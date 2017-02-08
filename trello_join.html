@@ -172,8 +172,8 @@
                     alias: "Members",
                     dataType: tableau.dataTypeEnum.string
                 }, {
-                    id: "Labels",
-                    alias: "Labels",
+                    id: "Project",
+                    alias: "Project",
                     dataType: tableau.dataTypeEnum.string
                 }, {
                     id: "Due",
@@ -190,10 +190,6 @@
                 }, {
                     id: "dateLastActivity",
                     alias: "dateLastActivity",
-                    dataType: tableau.dataTypeEnum.datetime
-                }, {
-                    id: "project",
-                    alias: "project",
                     dataType: tableau.dataTypeEnum.datetime
                 }
                 ];
@@ -215,7 +211,7 @@
             var apikey = "688c3a5077d79b8fc3cbfff7e5002e1d";
             var sitetoken = "f0fd2f6e828eff1bd22352f42cd2f9c6d9c3596db515e6051aba4108ea676e03";
             //'fqdV9rMa',
-            var boardid = ["cfb6MYWU", 'PalPvyUd'];
+            var boardid = ["cfb6MYWU", 'PalPvyUd','gexeP5RX'];
             //var boardid = "PalPvyUd"
             function buildUri(apikey, token, board) {
                 return 'https://api.trello.com/1/boards/' + board +
@@ -396,7 +392,6 @@
 										var complete = cards[ii].dueComplete;
 										var lastAct = cards[ii].dateLastActivity;
 										var index = unusedLists.indexOf(cardList);
-										var label = cards[ii].labels.name;
 										if (index > -1) {
 											unusedLists.splice(index, 1);
 										}
@@ -407,12 +402,11 @@
 											'Name': cardName,
 											'List': cardList,
 											'Members': memberlist.toString(),
-											'Labels': labels.toString(),
+											'Project': labels.toString(),
 											'Due': dueDate,
 											'dueComplete': complete,
 											'closed': cards[ii].closed,
-											'dateLastActivity': lastAct,
-											'project': label
+											'dateLastActivity': lastAct
 
 										};
 										dataToReturn.push(entry);

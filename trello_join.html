@@ -1,0 +1,446 @@
+<!doctype html>
+<html>
+<head>
+  <title>tester</title>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-store" />  
+  
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    
+  <script src="https://connectors.tableau.com/libs/tableauwdc-2.0.latest.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+	
+	     // JavaScript source code
+        (function () {
+            // Helper function to unpack the Trello data. Trello sends a list of attributes like members, lists, labels, etc
+            // as an object with name and ID. We store unpack those and create a javascript object for later user.
+            function buildObj(jsondata, attr) {
+                var listObj = {};
+                for (var ii = 0; ii < jsondata.length; ++ii) {
+                    listObj[jsondata[ii].id] = jsondata[ii][attr];
+                }
+                return listObj;
+            }
+            // Helper function to dereference the user ID to an actual name. We use the members ojbect we created earlier by
+            // passing the members list to the buildObj function
+            function get_members_name(idMembers, members) {
+                var memlist = [];
+                for (var ii = 0; ii < idMembers.length; ++ii) {
+                    memlist.push(members[idMembers[ii]]);
+                }
+                return memlist.length == 0 ? "No Members Assigned" : memlist;
+            }
+            // Helper function very similar to get_members_name above, only for labels this time.
+            function get_labels(labels) {
+                var labelary = [];
+                for (var ii = 0; ii < labels.length; ++ii) {
+                    labelary.push(labels[ii].name);
+                }
+                return labelary.length == 0 ? "No Labels Applied" : labelary;
+            }
+
+
+            function convertArrayOfObjectsToCSV(args) {
+                var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+
+                data = args.data || null;
+                if (data == null || !data.length) {
+                    return null;
+                }
+
+                columnDelimiter = args.columnDelimiter || ',';
+                lineDelimiter = args.lineDelimiter || '\n';
+
+                keys = Object.keys(data[0]);
+
+                result = '';
+                result += keys.join(columnDelimiter);
+                result += lineDelimiter;
+
+                data.forEach(function (item) {
+                    ctr = 0;
+                    keys.forEach(function (key) {
+                        if (ctr > 0) result += columnDelimiter;
+                        itemF = item[key];
+                        if (item[key] != null) {
+                            itemF = item[key].toString().replace(/,/g, " ");
+                        }
+                        //result += item[key];
+                        result += itemF;
+                        ctr++;
+                    });
+                    result += lineDelimiter;
+                });
+
+                return result;
+            }
+
+            function downloadCSV(args) {
+                var data, filename, link;
+                var csv = convertArrayOfObjectsToCSV({
+                    data: args
+                });
+                if (csv == null) return;
+
+                filename = 'trelloExport.csv';
+
+                if (!csv.match(/^data:text\/csv/i)) {
+                    csv = 'data:text/csv;charset=utf-8,' + csv;
+                }
+                data = encodeURI(csv);
+
+                link = document.createElement('a');
+                link.setAttribute('href', data);
+                link.setAttribute('download', filename);
+                link.click();
+            }
+
+
+            var myConnector = tableau.makeConnector();
+            // We are pulling in a very small set of fields from trello. There is a lot more data we could mine in this api.
+            // https://developers.trello.com/apis
+            /*myConnector.getColumnHeaders = function() {
+              var fieldNames = ['Id', 'List', 'Name', 'Members', 'Labels'];
+              var fieldTypes = ['string', 'string', 'string', 'string', 'string'];
+              tableau.incrementalExtractColumn = "Id";
+              tableau.headersCallback(fieldNames, fieldTypes);
+            };*/
+
+            myConnector.getSchema = function (schemaCallback) {
+                var actionCols = [
+                {
+                    id: "Board",
+                    alias: "Board",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "ActionId",
+                    alias: "ActionId",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "Id",
+                    alias: "Id",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "Name",
+                    alias: "Name",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "List",
+                    alias: "List",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "Action",
+                    alias: "Action",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "DateChange",
+                    alias: "DateChange",
+                    dataType: tableau.dataTypeEnum.datetime
+                }, {
+                    id: "ListBefore",
+                    alias: "ListBefore",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "ListAfter",
+                    alias: "ListAfter",
+                    dataType: tableau.dataTypeEnum.string
+                }
+                ];
+
+				var cols = [
+                {
+                    id: "Board",
+                    alias: "Board",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "Id",
+                    alias: "Id",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "List",
+                    alias: "List",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "Name",
+                    alias: "Name",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "Members",
+                    alias: "Members",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "Labels",
+                    alias: "Labels",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "Due",
+                    alias: "Due",
+                    dataType: tableau.dataTypeEnum.datetime
+                }, {
+                    id: "dueComplete",
+                    alias: "dueComplete",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "closed",
+                    alias: "closed",
+                    dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "dateLastActivity",
+                    alias: "dateLastActivity",
+                    dataType: tableau.dataTypeEnum.datetime
+                }
+                ];
+				
+                var ActionInfo = {
+                    id: "Trello_Actions",
+                    alias: "Trello_Actions",
+                    columns: actionCols
+                };
+				var tableInfo = {
+                    id: "Trello_Cards",
+                    alias: "Trello_Cards",
+                    columns: cols
+                };
+
+                schemaCallback([tableInfo,ActionInfo]);
+            };
+
+            var apikey = "688c3a5077d79b8fc3cbfff7e5002e1d";
+            var sitetoken = "f0fd2f6e828eff1bd22352f42cd2f9c6d9c3596db515e6051aba4108ea676e03";
+            //'fqdV9rMa',
+            var boardid = ["cfb6MYWU", 'PalPvyUd'];
+            //var boardid = "PalPvyUd"
+            function buildUri(apikey, token, board) {
+                return 'https://api.trello.com/1/boards/' + board +
+                        '/?key=' + apikey + "&" +
+                        'token=' + token + "&" +
+                        'lists=open&' +
+                        'list_fields=name&' +
+                        'cards=all&' +
+                        'members=all&' +
+                        'card_fields=all&actions=updateCard';//,closed';&actions?filter=updateCard:idList
+                //https://api.trello.com/1/boards/PalPvyUd/?key=688c3a5077d79b8fc3cbfff7e5002e1d&token=f0fd2f6e828eff1bd22352f42cd2f9c6d9c3596db515e6051aba4108ea676e03&lists=open&list_fields=name&cards=open&members=all&card_fields=name,desc,labels,idMembers,idList,id
+            };
+
+			myConnector.getData = function(table, doneCallback) {
+				if(table.tableInfo.id == 'Trello_Actions'){
+            //function trelloData(apikey, sitetoken, boardid){
+					var dataToReturn = [];
+					var responses = [];
+
+					for (k = 0; k < boardid.length; ++k) {
+						connData = buildUri(apikey, sitetoken, boardid[k]);
+						console.log("Connection " + k + " URI:" + connData);
+						responses.push($.ajax({
+							url: connData,
+							async: true,
+							dataType: 'json',
+							success: function (data) {
+								//if (data.lists && data.cards && data.members && data.actions) {
+								if (data.actions) {
+									// This is where we call the helper function above to unpack the lists of attributes that the trello API
+									// sends back in the form of ID => Attribute. We create a javascript object to use later.
+									//lists = buildObj(data.lists, 'name');
+									//members = buildObj(data.members, 'fullName');
+									/************************/
+									//cards = data.cards;
+									actions = data.actions;
+									/************************/
+									unusedLists = [];
+									// Create an array of listnames used so we can find any active list names that have no members or labels
+									//for (var listname in lists) {
+									//    unusedLists.push(lists[listname]);
+									//}
+									// Iterate over all the card data we get back from the Trello API. Create a javascript object called entry
+									// that contains all the members, labels, lists, etc. Push the entry object to an array.
+									for (ii = 0; ii < actions.length; ++ii) {
+										//var boardname = boardid[k];
+										/*var boardname = boardid[k];
+										var cardList = lists[cards[ii].idList];
+										var memberlist = get_members_name(cards[ii].idMembers, members);
+										var cardName = cards[ii].name;
+										var dueDate = cards[ii].due;
+										var complete = cards[ii].dueComplete;
+										var lastAct = cards[ii].dateLastActivity;
+										var index = unusedLists.indexOf(cardList);
+										if (index > -1) {
+											unusedLists.splice(index, 1);
+										}*/
+										var boardname = boardid[k];
+										//var cardList = lists[cards[ii].idList];
+										//var memberlist = get_members_name(cards[ii].idMembers, members);
+										var cardName = actions[ii].data.card.name;
+										var action = actions[ii].type;
+										var prevList = '';
+										if(actions[ii].data.listBefore != null){
+											var prevList = actions[ii].data.listBefore.name;
+										}
+										if(actions[ii].data.listAfter != null){
+											var nextList = actions[ii].data.listAfter.name;
+										}
+										
+										/*var index = unusedLists.indexOf(cardList);
+										if (index > -1) {
+											unusedLists.splice(index, 1);
+										}*/
+										//var labels = get_labels(cards[ii].labels);
+										var entry = {
+											'Board': actions[ii].data.board.name,
+											'ActionId': actions[ii].id,
+											'Id': actions[ii].data.card.id,
+											'Name': cardName,
+											//'List': cardList,
+											'Action': action,
+											'DateChange': actions[ii].date,
+											'ListBefore': prevList,
+											'ListAfter': nextList
+											//'Members': memberlist.toString(),
+											//'Labels': labels.toString(),
+											//'Due': dueDate,
+											//'dueComplete': complete,
+											//'closed': cards[ii].closed,
+											//'dateLastActivity': lastAct
+
+										};
+										dataToReturn.push(entry);
+										/*dataToReturn.push({
+										  'Board': boardname,
+										  'Id': cards[ii].id,
+										  'Name': cardName,
+										  'List': cardList,
+										  'Members': memberlist.toString(),
+										  'Labels': labels.toString()
+										});*/
+									};
+									// Iterate over all the unused lists and create dummy data.
+									/*for (var ii = 0; ii < unusedLists.length; ++ii) {
+										var entry = {
+											'Id': 'No ID',
+											'Name': 'No Name',
+											'List': unusedLists[ii],
+											'Members': 'No Members',
+											'Labels': 'No Labels'
+										};
+									  dataToReturn.push(entry);
+									}*/
+									//tableau.dataCallback(dataToReturn, dataToReturn.length.toString(), false);
+
+									//doneCallback();
+									//table.appendRows(dataToReturn);
+
+
+
+									//doneCallback();
+								}
+								//else {
+								//tableau.abortWithError("No results found for " + tableau.connectionData);
+								//}
+								//return dataToReturn;
+							}/*,
+							error: function (xhr, ajaxOptions, thrownError) {
+							  tableau.log("Connection error: " + xhr.responseText + "\n" + thrownError);
+							  tableau.abortWithError("Error while trying to connect to the Trello data source.");
+							}*/
+						 
+						}));
+					}
+					$.when.apply(null, responses).done(function(){
+						console.log('all request complete');
+						//downloadCSV(dataToReturn);
+						table.appendRows(dataToReturn);
+						doneCallback();
+						console.log('download ready');
+					});
+				}
+				
+				
+				if(table.tableInfo.id == 'Trello_Cards'){
+					var dataToReturn = [];
+					var responses = [];
+
+					for (k = 0; k < boardid.length; ++k) {
+						connData = buildUri(apikey, sitetoken, boardid[k]);
+						console.log("Connection " + k + " URI:" + connData);
+						responses.push($.ajax({
+							url: connData,
+							async: true,
+							dataType: 'json',
+							success: function (data) {
+								if (data.lists && data.cards && data.members) {
+									// This is where we call the helper function above to unpack the lists of attributes that the trello API
+									// sends back in the form of ID => Attribute. We create a javascript object to use later.
+									lists = buildObj(data.lists, 'name');
+									members = buildObj(data.members, 'fullName');
+									cards = data.cards;
+									unusedLists = [];
+									// Create an array of listnames used so we can find any active list names that have no members or labels
+									for (var listname in lists) {
+										unusedLists.push(lists[listname]);
+									}
+									// Iterate over all the card data we get back from the Trello API. Create a javascript object called entry
+									// that contains all the members, labels, lists, etc. Push the entry object to an array.
+									for (ii = 0; ii < cards.length; ++ii) {
+										//var boardname = boardid[k];
+										var boardname = boardid[k];
+										var cardList = lists[cards[ii].idList];
+										var memberlist = get_members_name(cards[ii].idMembers, members);
+										var cardName = cards[ii].name;
+										var dueDate = cards[ii].due;
+										var complete = cards[ii].dueComplete;
+										var lastAct = cards[ii].dateLastActivity;
+										var index = unusedLists.indexOf(cardList);
+										if (index > -1) {
+											unusedLists.splice(index, 1);
+										}
+										var labels = get_labels(cards[ii].labels);
+										var entry = {
+											'Board': data.name,
+											'Id': cards[ii].id,
+											'Name': cardName,
+											'List': cardList,
+											'Members': memberlist.toString(),
+											'Labels': labels.toString(),
+											'Due': dueDate,
+											'dueComplete': complete,
+											'closed': cards[ii].closed,
+											'dateLastActivity': lastAct
+
+										};
+										dataToReturn.push(entry);
+									};
+								}
+							}
+						}));
+					}
+					$.when.apply(null, responses).done(function(){
+						console.log('all request complete');
+						//downloadCSV(dataToReturn);
+						table.appendRows(dataToReturn);
+						doneCallback();
+						console.log('download ready');
+					});
+				}
+            };
+			
+			
+			
+        tableau.registerConnector(myConnector);
+        $(document).ready(function () {
+            $("#submitButton").click(function () { 
+			//table.appendRows(trelloData(apikey, sitetoken, boardid));
+			tableau.connectionName = "Trello Boards";
+			tableau.submit(); });
+        });
+        })();
+
+    </script>
+</head>
+<body>
+    
+    <p><button type="button" id="submitButton">Get the Data</button></p>
+    
+</body>
+</html> 

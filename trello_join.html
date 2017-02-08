@@ -112,24 +112,12 @@
             myConnector.getSchema = function (schemaCallback) {
                 var actionCols = [
                 {
-                    id: "Board",
-                    alias: "Board",
-                    dataType: tableau.dataTypeEnum.string
-                }, {
                     id: "ActionId",
                     alias: "ActionId",
                     dataType: tableau.dataTypeEnum.string
                 }, {
                     id: "Id",
                     alias: "Id",
-                    dataType: tableau.dataTypeEnum.string
-                }, {
-                    id: "Name",
-                    alias: "Name",
-                    dataType: tableau.dataTypeEnum.string
-                }, {
-                    id: "List",
-                    alias: "List",
                     dataType: tableau.dataTypeEnum.string
                 }, {
                     id: "Action",
@@ -277,10 +265,10 @@
 										if (index > -1) {
 											unusedLists.splice(index, 1);
 										}*/
-										var boardname = boardid[k];
+										//var boardname = boardid[k];
 										//var cardList = lists[cards[ii].idList];
 										//var memberlist = get_members_name(cards[ii].idMembers, members);
-										var cardName = actions[ii].data.card.name;
+										//var cardName = actions[ii].data.card.name;
 										var action = actions[ii].type;
 										var prevList = '';
 										if(actions[ii].data.listBefore != null){
@@ -296,10 +284,8 @@
 										}*/
 										//var labels = get_labels(cards[ii].labels);
 										var entry = {
-											'Board': actions[ii].data.board.name,
 											'ActionId': actions[ii].id,
 											'Id': actions[ii].data.card.id,
-											'Name': cardName,
 											//'List': cardList,
 											'Action': action,
 											'DateChange': actions[ii].date,

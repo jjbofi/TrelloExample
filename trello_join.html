@@ -191,7 +191,7 @@
                 ];
 				
                 var ActionInfo = {
-                    id: "Trello_Actions",
+                    id: "Trello_Cards_Actions",
                     alias: "Trello_Actions",
                     columns: actionCols
                 };
@@ -222,7 +222,7 @@
             };
 
 			myConnector.getData = function(table, doneCallback) {
-				if(table.tableInfo.id == 'Trello_Actions'){
+				if(table.tableInfo.id == 'Trello_Cards_Actions'){
             //function trelloData(apikey, sitetoken, boardid){
 					var dataToReturn = [];
 					var responses = [];

@@ -147,6 +147,10 @@
                     id: "ListAfter",
                     alias: "ListAfter",
                     dataType: tableau.dataTypeEnum.string
+                }, {
+                    id: "RowNum",
+                    alias: "RowNum",
+                    dataType: tableau.dataTypeEnum.int
                 }
                 ];
 
@@ -300,7 +304,8 @@
 											'Action': action,
 											'DateChange': actions[ii].date,
 											'ListBefore': prevList,
-											'ListAfter': nextList
+											'ListAfter': nextList,
+											'RowNum': ii
 											//'Members': memberlist.toString(),
 											//'Labels': labels.toString(),
 											//'Due': dueDate,

@@ -191,6 +191,10 @@
                     id: "dateLastActivity",
                     alias: "dateLastActivity",
                     dataType: tableau.dataTypeEnum.datetime
+                }, {
+                    id: "Description",
+                    alias: "Description",
+                    dataType: tableau.dataTypeEnum.string
                 }
                 ];
 				
@@ -406,7 +410,8 @@
 											'Due': dueDate,
 											'dueComplete': complete,
 											'closed': cards[ii].closed,
-											'dateLastActivity': lastAct
+											'dateLastActivity': lastAct,
+											'Description': cards[ii].desc
 
 										};
 										dataToReturn.push(entry);

@@ -191,6 +191,10 @@
                     id: "dateLastActivity",
                     alias: "dateLastActivity",
                     dataType: tableau.dataTypeEnum.datetime
+                }, {
+                    id: "project",
+                    alias: "project",
+                    dataType: tableau.dataTypeEnum.datetime
                 }
                 ];
 				
@@ -392,6 +396,7 @@
 										var complete = cards[ii].dueComplete;
 										var lastAct = cards[ii].dateLastActivity;
 										var index = unusedLists.indexOf(cardList);
+										var label = cards[ii].labels.name;
 										if (index > -1) {
 											unusedLists.splice(index, 1);
 										}
@@ -406,7 +411,8 @@
 											'Due': dueDate,
 											'dueComplete': complete,
 											'closed': cards[ii].closed,
-											'dateLastActivity': lastAct
+											'dateLastActivity': lastAct,
+											'project': label
 
 										};
 										dataToReturn.push(entry);

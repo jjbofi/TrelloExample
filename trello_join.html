@@ -390,6 +390,20 @@
 										if (index > -1) {
 											unusedLists.splice(index, 1);
 										}
+										var descr = cards[ii].desc;
+										 if (/-{2,}/.exec(descr)) {
+											descr = descr.substring(0,/-{2,}/.exec(descr).index-1);
+										  }
+										    descr = descr.trim();
+										    //descr.replace(/\r/,";")
+										    if (/\n/.exec(descr)) {
+											console.log(/\n/.exec(descr).lastIndex);
+											//    descr = descr.substring(0, /\n/.exec(descr).index - 1);
+											while (/\n/.exec(descr)) {
+											    descr = descr.substring(0, /\n/.exec(descr).index) + '; ' + descr.slice(/\n/.exec(descr).index + 1);
+											}
+										    }
+
 										var labels = get_labels(cards[ii].labels);
 										var entry = {
 											'Board': data.name,
